@@ -22,7 +22,7 @@
                 require_once "includes/db_config.php";
 
                 $sql = "SELECT item_name, item_category, item_subcategory, SUM(quantity) AS total_quantity
-                        FROM items
+                        FROM item
                         GROUP BY item_name, item_category, item_subcategory
                         ORDER BY item_name";
                 $result = $conn->query($sql);
