@@ -2,10 +2,12 @@
 // process_invoice_item_report.php
 require_once "includes/db_config.php";
 
+$searchKeyword = "";
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Sanitize and validate form data (implement form validation here)
     $startDate = $_POST["start_date"];
     $endDate = $_POST["end_date"];
+    $searchKeyword = $_POST["search_keyword"];
 
     // Perform server-side validation
     if (empty($startDate) || empty($endDate)) {
@@ -25,9 +27,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             FROM invoices
             INNER JOIN customers ON invoices.customer_id = customers.id
             INNER JOIN items ON invoices.item_id = items.id
-            WHERE invoice_date BETWEEN ? AND ?";
+            WHERE invoice_date BETWEEN ? AND ?
+            AND (invoices.invoice_number LIKE ? OR customers.first_name LIKE ? OR customers.last_name LIKE ?)";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ss", $startDate, $endDate);
+    $searchKeyword = "%$searchKeyword%"; // Add wildcards for searching
+    $stmt->bind_param("sss", $startDate, $endDate, $searchKeyword, $searchKeyword, $searchKeyword);
     $stmt->execute();
     $result = $stmt->get_result();
 
@@ -50,6 +54,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         <input type="date" name="start_date" required><br>
         <label>End Date:</label>
         <input type="date" name="end_date" required><br>
+        <label>Search Keyword:</label>
+        <input type="text" name="search_keyword" value="<?php echo htmlspecialchars($searchKeyword); ?>"><br>
         <input type="submit" value="Generate Report">
     </form>
 
