@@ -3,7 +3,7 @@
 require_once "includes/db_config.php";
 
 // Retrieve item data from the database
-$sql = "SELECT * FROM items";
+$sql = "SELECT * FROM item";
 $result = $conn->query($sql);
 ?>
 
