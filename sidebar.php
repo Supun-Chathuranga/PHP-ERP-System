@@ -15,6 +15,7 @@
             <li><a href="item_list.php">Item List</a></li>
             <li><a href="invoice_report.php">Invoice Report</a></li>
             <li><a href="invoice_item_report.php">Invoice Item Report</a></li>
+            <li><a href="item_report.php">Item Report</a></li>
             <!-- Add more navigation links as needed for other pages -->
         </ul>
     </nav>
