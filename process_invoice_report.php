@@ -2,10 +2,12 @@
 // process_invoice_report.php
 require_once "includes/db_config.php";
 
+$searchKeyword = "";
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Sanitize and validate form data (implement form validation here)
     $startDate = $_POST["start_date"];
     $endDate = $_POST["end_date"];
+    $searchKeyword = $_POST["search_keyword"];
 
     // Perform server-side validation
     if (empty($startDate) || empty($endDate)) {
@@ -19,16 +21,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $endDate = date("Y-m-d", strtotime($endDate));
 
     // Prepare and execute the SQL query to retrieve the invoice report data
-    $sql = "SELECT invoices.invoice_number, invoices.invoice_date, customers.first_name, customers.last_name,
-            customers.district, COUNT(items.id) AS item_count, SUM(items.unit_price * items.quantity) AS invoice_amount
+    $sql = "SELECT invoice_number, invoice_date, customer_name, customer_district, 
+            COUNT(item_id) AS item_count, SUM(item_unit_price) AS invoice_amount
             FROM invoices
-            INNER JOIN customers ON invoices.customer_id = customers.id
-            INNER JOIN items ON invoices.item_id = items.id
             WHERE invoice_date BETWEEN ? AND ?
-            GROUP BY invoices.invoice_number, invoices.invoice_date, customers.first_name, customers.last_name,
-            customers.district";
+            AND (invoice_number LIKE ? OR customer_name LIKE ? OR customer_district LIKE ?)
+            GROUP BY invoice_number";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ss", $startDate, $endDate);
+    $searchKeyword = "%$searchKeyword%"; // Add wildcards for searching
+    $stmt->bind_param("sss", $startDate, $endDate, $searchKeyword, $searchKeyword, $searchKeyword);
     $stmt->execute();
     $result = $stmt->get_result();
 
@@ -51,6 +52,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         <input type="date" name="start_date" required><br>
         <label>End Date:</label>
         <input type="date" name="end_date" required><br>
+        <label>Search Keyword:</label>
+        <input type="text" name="search_keyword" value="<?php echo htmlspecialchars($searchKeyword); ?>"><br>
         <input type="submit" value="Generate Report">
     </form>
 
@@ -68,8 +71,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         <tr>
             <td><?php echo $row["invoice_number"]; ?></td>
             <td><?php echo $row["invoice_date"]; ?></td>
-            <td><?php echo $row["first_name"] . " " . $row["last_name"]; ?></td>
-            <td><?php echo $row["district"]; ?></td>
+            <td><?php echo $row["customer_name"]; ?></td>
+            <td><?php echo $row["customer_district"]; ?></td>
             <td><?php echo $row["item_count"]; ?></td>
             <td><?php echo $row["invoice_amount"]; ?></td>
         </tr>
