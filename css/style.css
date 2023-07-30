@@ -68,3 +68,131 @@ h3 {
     color: red;
     margin-bottom: 10px;
 }
+
+/* style.css */
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+/* CSS for Sidebar */
+.sidebar {
+    width: 200px;
+    height: 100%;
+    background-color: #f1f1f1;
+    padding-top: 20px;
+}
+
+.sidebar ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.sidebar li {
+    margin-bottom: 5px;
+}
+
+.sidebar a {
+    display: block;
+    padding: 10px;
+    text-decoration: none;
+    color: #333;
+}
+
+.sidebar a:hover {
+    background-color: #ddd;
+}
+
+/* CSS for Content */
+.content {
+    margin-left: 220px; /* Width of the sidebar + 20px for spacing */
+    padding: 20px;
+}
+
+/* Rest of your CSS styles for form elements, tables, reports, etc. */
+
+/* CSS Grid Layout */
+.container {
+    display: grid;
+    grid-template-columns: 200px 1fr; /* First column 200px wide, second column takes remaining space */
+}
+
+/* Styling for the Login Form */
+.login-container {
+    width: 300px;
+    margin: 50px auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.login-container h2 {
+    margin-bottom: 20px;
+}
+
+.login-container form {
+    text-align: left;
+}
+
+.login-container label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.login-container input[type="text"],
+.login-container input[type="password"] {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.login-container input[type="submit"] {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.login-container input[type="submit"]:hover {
+    background-color: #45a049;
+}
+
+.form-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.form-column {
+    flex: 1;
+    display: flex;
+    align-items: center;
+}
+
+.form-column label {
+    margin-right: 10px;
+    white-space: nowrap;
+}
+
+.form-column:first-child {
+    margin-right: 50px;
+}
+/* Add space between the columns */
+.form-column:not(:last-child) {
+    margin-right: 20px;
+}
+
+/* Adjust input width */
+.form-column input {
+    width: 100%;
+}
+.form-column input[type="text"] {
+    width: 120px; /* Increase the width of the search input field */
+}
