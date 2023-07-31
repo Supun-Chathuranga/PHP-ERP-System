@@ -1,64 +1,63 @@
 <?php
 require_once "includes/db_config.php";
 
+// Retrieve category and subcategory options from the database
+$category_sql = "SELECT * FROM item_category";
+$category_result = $conn->query($category_sql);
+
+$subcategory_sql = "SELECT * FROM item_subcategory";
+$subcategory_result = $conn->query($subcategory_sql);
+
+// Initialize variables
+$item_code = $item_name = $item_category = $item_subcategory = $quantity = $unit_price = '';
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Retrieve the item ID from the URL parameter
-    if (isset($_GET['id']) && is_numeric($_GET['id'])) {
-        $item_id = $_GET['id'];
+    if (isset($_POST["update_item"])) {
+        // Retrieve data from the form submission
+        $item_id = $_POST['item_id'];
+        $item_code = $_POST['item_code'];
+        $item_name = $_POST['item_name'];
+        $item_category = $_POST['item_category'];
+        $item_subcategory = $_POST['item_subcategory'];
+        $quantity = $_POST['quantity'];
+        $unit_price = $_POST['unit_price'];
 
-        // Retrieve item data from the database
-        $sql = "SELECT * FROM item WHERE id = $item_id";
-        $result = $conn->query($sql);
+        // Update the item in the database
+        $update_sql = "UPDATE item SET
+                       item_code = '$item_code',
+                       item_name = '$item_name',
+                       item_category = '$item_category',
+                       item_subcategory = '$item_subcategory',
+                       quantity = '$quantity',
+                       unit_price = '$unit_price'
+                       WHERE id = $item_id";
 
-        if ($result->num_rows === 1) {
-            // Fetch item details
-            $row = $result->fetch_assoc();
-            $item_code = $_POST['item_code'];
-            $item_name = $_POST['item_name'];
-            $item_category = $_POST['item_category'];
-            $item_subcategory = $_POST['item_subcategory'];
-            $quantity = $_POST['quantity'];
-            $unit_price = $_POST['unit_price'];
-
-            // Update item in the database
-            $update_sql = "UPDATE item SET item_code = '$item_code', item_name = '$item_name', 
-                           item_category = '$item_category', item_subcategory = '$item_subcategory', 
-                           quantity = '$quantity', unit_price = '$unit_price' 
-                           WHERE id = $item_id";
-
-            if ($conn->query($update_sql) === TRUE) {
-                // Redirect to the item list page after successful update
-                header("Location: item_list.php?success=1");
-                exit();
-            } else {
-                echo "Error updating item: " . $conn->error;
-            }
-        } else {
-            echo "Item not found.";
+        if ($conn->query($update_sql) === TRUE) {
+            // Redirect to the item list page with a success flag in the URL
+            header("Location: item_list.php?success=1");
             exit();
+        } else {
+            echo "Error updating item: " . $conn->error;
         }
-    } else {
-        echo "Invalid item ID.";
-        exit();
     }
 } else {
-    // Retrieve the item ID from the URL parameter
+    // Check if the item ID is provided in the URL
     if (isset($_GET['id']) && is_numeric($_GET['id'])) {
         $item_id = $_GET['id'];
 
-        // Retrieve item data from the database
-        $sql = "SELECT * FROM item WHERE id = $item_id";
-        $result = $conn->query($sql);
+        // Retrieve item data from the database based on the item ID
+        $item_sql = "SELECT * FROM item WHERE id = $item_id";
+        $item_result = $conn->query($item_sql);
 
-        if ($result->num_rows === 1) {
+        if ($item_result->num_rows === 1) {
             // Fetch item details
-            $row = $result->fetch_assoc();
-            $item_code = $row["item_code"];
-            $item_name = $row["item_name"];
-            $item_category = $row["item_category"];
-            $item_subcategory = $row["item_subcategory"];
-            $quantity = $row["quantity"];
-            $unit_price = $row["unit_price"];
+            $item_row = $item_result->fetch_assoc();
+            $item_code = $item_row["item_code"];
+            $item_name = $item_row["item_name"];
+            $item_category = $item_row["item_category"];
+            $item_subcategory = $item_row["item_subcategory"];
+            $quantity = $item_row["quantity"];
+            $unit_price = $item_row["unit_price"];
         } else {
             echo "Item not found.";
             exit();
@@ -82,14 +81,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <div class="content">
             <h2>Update Item</h2>
             <form name="itemForm" action="" method="POST">
+                <input type="hidden" name="item_id" value="<?php echo $item_id; ?>">
                 <label>Item Code:</label>
                 <input type="text" name="item_code" value="<?php echo $item_code; ?>" required><br>
                 <label>Item Name:</label>
                 <input type="text" name="item_name" value="<?php echo $item_name; ?>" required><br>
                 <label>Item Category:</label>
-                <input type="text" name="item_category" value="<?php echo $item_category; ?>" required><br>
+                <select name="item_category" required>
+                    <option value="">Select Category</option>
+                    <?php while ($category_row = $category_result->fetch_assoc()) : ?>
+                        <option value="<?php echo $category_row['id']; ?>" <?php echo ($item_category == $category_row['id']) ? 'selected' : ''; ?>>
+                            <?php echo $category_row['category']; ?>
+                        </option>
+                    <?php endwhile; ?>
+                </select><br>
                 <label>Item Subcategory:</label>
-                <input type="text" name="item_subcategory" value="<?php echo $item_subcategory; ?>" required><br>
+                <select name="item_subcategory" required>
+                    <option value="">Select Subcategory</option>
+                    <?php while ($subcategory_row = $subcategory_result->fetch_assoc()) : ?>
+                        <option value="<?php echo $subcategory_row['id']; ?>" <?php echo ($item_subcategory == $subcategory_row['id']) ? 'selected' : ''; ?>>
+                            <?php echo $subcategory_row['sub_category']; ?>
+                        </option>
+                    <?php endwhile; ?>
+                </select><br>
                 <label>Quantity:</label>
                 <input type="text" name="quantity" value="<?php echo $quantity; ?>" required><br>
                 <label>Unit Price:</label>

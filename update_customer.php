@@ -1,7 +1,7 @@
+<!-- update_customer.php -->
 <?php
 require_once "includes/db_config.php";
 
-// Check if the form is submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Retrieve the customer ID from the URL parameter
     if (isset($_GET['id']) && is_numeric($_GET['id'])) {
@@ -14,7 +14,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($result->num_rows === 1) {
             // Fetch customer details
             $row = $result->fetch_assoc();
-            $title = $_POST['title'];
+            $title = $row["title"];
             $first_name = $_POST['first_name'];
             $last_name = $_POST['last_name'];
             $contact_no = $_POST['contact_no'];
@@ -26,6 +26,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                            WHERE id = $customer_id";
 
             if ($conn->query($update_sql) === TRUE) {
+                // Redirect to the customer list page after successful update
                 header("Location: customer_list.php?success=1");
                 exit();
             } else {
@@ -40,7 +41,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     }
 } else {
-    // Retrieve the customer ID from the URL parameter and fetch customer data
+    // Retrieve the customer ID from the URL parameter
     if (isset($_GET['id']) && is_numeric($_GET['id'])) {
         $customer_id = $_GET['id'];
 
@@ -80,26 +81,33 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <h2>Update Customer</h2>
             <form name="customerForm" action="" method="POST">
                 <label>Title:</label>
-                <input type="text" name="title" value="<?php echo $title; ?>" required><br>
+                <input type="text" name="title" value="<?php if(isset($title)) echo $title; ?>" required><br>
                 <label>First Name:</label>
-                <input type="text" name="first_name" value="<?php echo $first_name; ?>" required><br>
+                <input type="text" name="first_name" value="<?php if(isset($first_name)) echo $first_name; ?>" required><br>
                 <label>Last Name:</label>
-                <input type="text" name="last_name" value="<?php echo $last_name; ?>" required><br>
+                <input type="text" name="last_name" value="<?php if(isset($last_name)) echo $last_name; ?>" required><br>
                 <label>Contact Number:</label>
-                <input type="text" name="contact_no" value="<?php echo $contact_no; ?>"><br>
+                <input type="text" name="contact_no" value="<?php if(isset($contact_no)) echo $contact_no; ?>"><br>
                 <label>District:</label>
-                <select name="district" required>
+                <select name="district">
                     <?php
-                    // Retrieve district data from the database
-                    $district_sql = "SELECT * FROM district";
-                    $district_result = $conn->query($district_sql);
+                    // Retrieve the list of districts from the database
+                    $district_query = "SELECT id, district FROM district";
+                    $district_result = $conn->query($district_query);
 
-                    if ($district_result->num_rows > 0) {
+                    if ($district_result && $district_result->num_rows > 0) {
                         while ($district_row = $district_result->fetch_assoc()) {
-                            $district_name = $district_row["district"];
-                            $selected = ($district_name === $district) ? "selected" : "";
-                            echo "<option value='$district_name' $selected>$district_name</option>";
+                            $district_id = $district_row['id'];
+                            $district_name = $district_row['district'];
+
+                            // Check if this district is selected for the current customer
+                            $selected = ($district_id == $district) ? "selected" : "";
+
+                            // Output the option element
+                            echo "<option value='$district_id' $selected>$district_name</option>";
                         }
+                    } else {
+                        echo "<option value=''>No districts found</option>";
                     }
                     ?>
                 </select><br>

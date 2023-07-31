@@ -5,7 +5,7 @@ if (isset($_GET["id"])) {
     $id = $_GET["id"];
     
     // Delete the item from the database
-    $sql = "DELETE FROM items WHERE id = ?";
+    $sql = "DELETE FROM item WHERE id = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $id);
     
@@ -21,4 +21,4 @@ if (isset($_GET["id"])) {
 }
 ?>
 
-<!-- The rest of the delete_item.php page remains unchanged as in the previous response -->
+

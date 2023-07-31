@@ -21,22 +21,45 @@
                 // Perform the query to retrieve item report data
                 require_once "includes/db_config.php";
 
-                $sql = "SELECT item_name, item_category, item_subcategory, SUM(quantity) AS total_quantity
-                        FROM item
-                        GROUP BY item_name, item_category, item_subcategory
-                        ORDER BY item_name";
+                $sql = "SELECT i.item_name, ic.category, isc.sub_category, SUM(i.quantity) AS total_quantity
+                        FROM item AS i
+                        INNER JOIN item_category AS ic ON i.item_category = ic.id
+                        INNER JOIN item_subcategory AS isc ON i.item_subcategory = isc.id
+                        GROUP BY i.item_name, ic.category, isc.sub_category
+                        ORDER BY i.item_name";
                 $result = $conn->query($sql);
+
+                $previousItemName = null; // Variable to keep track of previous item name
 
                 if ($result->num_rows > 0) {
                     while ($row = $result->fetch_assoc()) {
-                        ?>
-                        <tr>
-                            <td><?php echo $row["item_name"]; ?></td>
-                            <td><?php echo $row["item_category"]; ?></td>
-                            <td><?php echo $row["item_subcategory"]; ?></td>
-                            <td><?php echo $row["total_quantity"]; ?></td>
-                        </tr>
-                        <?php
+                        $itemName = $row["item_name"];
+                        $category = $row["category"];
+                        $subcategory = $row["sub_category"];
+                        $totalQuantity = $row["total_quantity"];
+
+                        // Display the item name only when it changes
+                        if ($itemName !== $previousItemName) {
+                            ?>
+                            <tr>
+                                <td><?php echo $itemName; ?></td>
+                                <td><?php echo $category; ?></td>
+                                <td><?php echo $subcategory; ?></td>
+                                <td><?php echo $totalQuantity; ?></td>
+                            </tr>
+                            <?php
+                            $previousItemName = $itemName; // Update the previous item name
+                        } else {
+                            // For consecutive rows with the same item name, display an empty cell for item name
+                            ?>
+                            <tr>
+                                <td></td>
+                                <td><?php echo $category; ?></td>
+                                <td><?php echo $subcategory; ?></td>
+                                <td><?php echo $totalQuantity; ?></td>
+                            </tr>
+                            <?php
+                        }
                     }
                 } else {
                     ?>

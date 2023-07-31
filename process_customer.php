@@ -1,29 +1,37 @@
 <?php
-// process_customer.php
-require_once "includes/db_config.php";
-
+// Check if the form is submitted
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    // Sanitize and validate form data (implement form validation here)
+    require_once "includes/db_config.php";
 
-    // Prepare and execute the SQL query to insert the customer data
-    $sql = "INSERT INTO customers (title, first_name, last_name, contact_number, district)
+    // Sanitize and validate form data (implement form validation here)
+    $title = $_POST["title"];
+    $firstName = $_POST["first_name"];
+    $lastName = $_POST["last_name"];
+    $contactNo = $_POST["contact_no"];
+    $districtId = $_POST["district"];
+
+    // Prepare and execute the SQL query to insert the customer into the database
+    $sql = "INSERT INTO customer (title, first_name, last_name, contact_no, district)
             VALUES (?, ?, ?, ?, ?)";
+
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param(
-        "sssss",
-        $_POST["title"],
-        $_POST["first_name"],
-        $_POST["last_name"],
-        $_POST["contact_number"],
-        $_POST["district"]
-    );
-    $stmt->execute();
+    $stmt->bind_param("sssss", $title, $firstName, $lastName, $contactNo, $districtId);
+
+    // Check if the customer is successfully added to the database
+    if ($stmt->execute()) {
+        // Customer added successfully, redirect back to add_customer.php with success message
+        header("Location: add_customer.php?success=1");
+        exit();
+    } else {
+        // Customer adding failed, redirect back to add_customer.php with error message
+        header("Location: add_customer.php?error=1");
+        exit();
+    }
+
+    // Close the prepared statement
+    $stmt->close();
 
     // Close the database connection
-    $stmt->close();
     $conn->close();
-
-    // Redirect to the customer list page or display a success message
-    header("Location: customer_list.php");
-    exit();
 }
+?>
